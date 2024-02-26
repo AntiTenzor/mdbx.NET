@@ -60,25 +60,66 @@ namespace MDBX
             Dbi.Drop(_tran._txnPtr, _dbi, false);
         }
 
-        public void Put(byte[] key, byte[] value, PutOption option = PutOption.Unspecific)
+        /// <summary>
+        /// Put data into a database.
+        /// </summary>
+        /// <param name="key">A key to identify this value (NOT-NULL and NOT-EMPTY).</param>
+        /// <param name="value">A byte array containing the value to put in the database.</param>
+        /// <param name="option">Operation options (optional).</param>
+        public unsafe void Put(byte[] key, byte[] value, PutOption option = PutOption.Unspecific)
         {
-            IntPtr keyPtr = Marshal.AllocHGlobal(key.Length);
-            IntPtr valuePtr = Marshal.AllocHGlobal(value.Length);
-            
-            try
+            fixed (byte* keyPtr = key)
+            fixed (byte* valuePtr = value)
             {
-                Marshal.Copy(key, 0, keyPtr, key.Length);
-                Marshal.Copy(value, 0, valuePtr, value.Length);
+                DbValue dbKey = new DbValue((IntPtr)keyPtr, key.Length);
+                DbValue dbValue = new DbValue((IntPtr)valuePtr, value.Length);
 
-
-                DbValue dbKey = new DbValue(keyPtr, key.Length);
-                DbValue dbValue = new DbValue(valuePtr, value.Length);
                 Dbi.Put(_tran._txnPtr, _dbi, dbKey, dbValue, option);
             }
-            finally
+        }
+
+        /// <summary>
+        /// Put data into a database for an integer key.
+        /// </summary>
+        /// <param name="key">An integer key to identify this value.</param>
+        /// <param name="value">A byte array containing the value to put in the database.</param>
+        /// <param name="option">Operation options (optional).</param>
+        public unsafe void Put(int key, byte[] value, PutOption option = PutOption.Unspecific)
+        {
+            byte* keyPtr = (byte*)(&key);
+            fixed (byte* valuePtr = value)
             {
-                Marshal.FreeHGlobal(keyPtr);
-                Marshal.FreeHGlobal(valuePtr);
+                DbValue dbKey = new DbValue((IntPtr)keyPtr, sizeof(int));
+                DbValue dbValue = new DbValue((IntPtr)valuePtr, value.Length);
+
+                Dbi.Put(_tran._txnPtr, _dbi, dbKey, dbValue, option);
+            }
+        }
+
+        /// <summary>
+        /// Put string data into a database for an integer key.
+        /// </summary>
+        /// <param name="key">An integer key to identify this value.</param>
+        /// <param name="text">A string containing the value to put in the database.</param>
+        /// <param name="encoding">Encoding to convert string to byte array (NOT NULL!).</param>
+        /// <param name="option">Operation options (optional).</param>
+        public unsafe void Put(int key, string text, Encoding encoding, PutOption option = PutOption.Unspecific)
+        {
+            if (encoding == null)
+                throw new ArgumentNullException(nameof(encoding));
+
+            // It is better to throw ANEx when (value==null), than to replace it with empty array.
+            if (text == null)
+                throw new ArgumentNullException(nameof(text));
+
+            byte[] value = encoding.GetBytes(text);
+            byte* keyPtr = (byte*)(&key);
+            fixed (byte* valuePtr = value)
+            {
+                DbValue dbKey = new DbValue((IntPtr)keyPtr, sizeof(int));
+                DbValue dbValue = new DbValue((IntPtr)valuePtr, value.Length);
+
+                Dbi.Put(_tran._txnPtr, _dbi, dbKey, dbValue, option);
             }
         }
 

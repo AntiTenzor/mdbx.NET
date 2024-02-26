@@ -12,6 +12,11 @@ namespace MDBX.UnitTest
 {
     public class BasicTest
     {
+        /// <summary>
+        /// Max number of databases
+        /// </summary>
+        private const int maxDatabases = 10;
+
         [Fact(DisplayName = "put / set / delete single key (strong type)")]
         public void Test1()
         {
@@ -21,7 +26,7 @@ namespace MDBX.UnitTest
 
             using (MdbxEnvironment env = new MdbxEnvironment())
             {
-                env.SetMaxDatabases(10) /* allow us to use a different db for testing */
+                env.SetMaxDatabases(maxDatabases) /* allow us to use a different db for testing */
                    .Open(path, EnvironmentFlag.NoTLS, Convert.ToInt32("666", 8));
 
                 DatabaseOption optionCreate = DatabaseOption.Create /* needed to create a new db if not exists */
@@ -225,5 +230,176 @@ namespace MDBX.UnitTest
             }
         }
 
+        [Fact(DisplayName = "put / set EMPTY key")]
+        public void TestEmptyKey()
+        {
+            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "mdbx");
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+
+            using (MdbxEnvironment env = new MdbxEnvironment())
+            {
+                env.SetMaxDatabases(maxDatabases); /* allow us to use a different db for testing */
+                env.Open(path, EnvironmentFlag.NoTLS, Convert.ToInt32("666", 8));
+
+                byte[] key0 = new byte[0]; // EMPTY key for INTEGER-KEY DATABASE!
+                byte[] value = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString()); // some value in bytes
+
+
+
+                // mdbx_put
+                DatabaseOption optionCreate = DatabaseOption.Create /* needed to create a new db if not exists */
+                    | DatabaseOption.IntegerKey /* optimized for fixed key */;
+
+                using (MdbxTransaction tran = env.BeginTransaction())
+                {
+                    MdbxDatabase db = tran.OpenDatabase(name: "test_int_key", option: optionCreate);
+                    // MDBX mdbx_put returned (-30781) - MDBX_BAD_VALSIZE: Invalid size or alignment of key or data for target database, either invalid subDB name
+                    try
+                    {
+                        db.Put(key0, value);
+                        throw new InvalidOperationException($"Engine must throw MdbxException with ErrorNumber:{MdbxCode.MDBX_BAD_VALSIZE} ==> MDBX_BAD_VALSIZE for EMPTY integer key.");
+                    }
+                    catch (MdbxException mEx)
+                    {
+                        if (mEx.ErrorNumber == MdbxCode.MDBX_BAD_VALSIZE)
+                        {
+                            // This is EXPECTED exception for EMPTY key
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException($"Engine must throw MdbxException with ErrorNumber:{MdbxCode.MDBX_BAD_VALSIZE} ==> MDBX_BAD_VALSIZE for EMPTY integer key.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Engine must throw MdbxException with ErrorNumber:{MdbxCode.MDBX_BAD_VALSIZE} ==> MDBX_BAD_VALSIZE for EMPTY integer key.");
+                    }
+                    tran.Commit();
+                }
+
+
+
+                env.Close();
+            }
+        }
+
+        [Fact(DisplayName = "put / set single-byte key")]
+        public void TestByte1Key()
+        {
+            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "mdbx");
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+
+            using (MdbxEnvironment env = new MdbxEnvironment())
+            {
+                env.SetMaxDatabases(maxDatabases); /* allow us to use a different db for testing */
+                env.Open(path, EnvironmentFlag.NoTLS, Convert.ToInt32("666", 8));
+
+                byte[] key1 = new byte[] { 17 }; // EMPTY key for INTEGER-KEY DATABASE!
+                byte[] value = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString()); // some value in bytes
+
+
+
+                // mdbx_put
+                DatabaseOption optionCreate = DatabaseOption.Create /* needed to create a new db if not exists */
+                    | DatabaseOption.IntegerKey /* optimized for fixed key */;
+
+                using (MdbxTransaction tran = env.BeginTransaction())
+                {
+                    MdbxDatabase db = tran.OpenDatabase(name: "test_int_key", option: optionCreate);
+                    // MDBX mdbx_put returned (-30781) - MDBX_BAD_VALSIZE: Invalid size or alignment of key or data for target database, either invalid subDB name
+                    try
+                    {
+                        db.Put(key1, value);
+                        throw new InvalidOperationException($"Engine must throw MdbxException with ErrorNumber:{MdbxCode.MDBX_BAD_VALSIZE} ==> MDBX_BAD_VALSIZE for EMPTY integer key.");
+                    }
+                    catch (MdbxException mEx)
+                    {
+                        if (mEx.ErrorNumber == MdbxCode.MDBX_BAD_VALSIZE)
+                        {
+                            // This is EXPECTED exception for EMPTY key
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException($"Engine must throw MdbxException with ErrorNumber:{MdbxCode.MDBX_BAD_VALSIZE} ==> MDBX_BAD_VALSIZE for EMPTY integer key.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Engine must throw MdbxException with ErrorNumber:{MdbxCode.MDBX_BAD_VALSIZE} ==> MDBX_BAD_VALSIZE for EMPTY integer key.");
+                    }
+                    tran.Commit();
+                }
+
+
+
+                env.Close();
+            }
+        }
+
+        [Fact(DisplayName = "put / set Int32 key")]
+        public void TestInt32Key()
+        {
+            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "mdbx");
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+
+            using (MdbxEnvironment env = new MdbxEnvironment())
+            {
+                env.SetMaxDatabases(maxDatabases); /* allow us to use a different db for testing */
+                env.Open(path, EnvironmentFlag.NoTLS, Convert.ToInt32("666", 8));
+
+                byte[] value = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString()); // some value in bytes
+
+
+
+                // mdbx_put
+                DatabaseOption optionCreate = DatabaseOption.Create /* needed to create a new db if not exists */
+                    | DatabaseOption.IntegerKey /* optimized for fixed key */;
+
+                using (MdbxTransaction tran = env.BeginTransaction())
+                {
+                    MdbxDatabase db = tran.OpenDatabase(name: "test_int_key", option: optionCreate);
+                    db.Put(7, value);
+                    tran.Commit();
+                }
+
+
+
+                env.Close();
+            }
+        }
+
+        //[Fact(DisplayName = "put / set NULL key")]
+        public void TestNullKey()
+        {
+            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "mdbx");
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+
+            using (MdbxEnvironment env = new MdbxEnvironment())
+            {
+                env.Open(path, EnvironmentFlag.NoTLS, Convert.ToInt32("666", 8));
+
+                //string key = Guid.NewGuid().ToString("N"); // some key
+                byte[] value = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString()); // some value in bytes
+
+
+
+                // mdbx_put
+                using (MdbxTransaction tran = env.BeginTransaction())
+                {
+                    MdbxDatabase db = tran.OpenDatabase();
+                    // NRE from this call
+                    db.Put(null, value);
+                    tran.Commit();
+                }
+
+
+
+                env.Close();
+            }
+        }
     }
 }
