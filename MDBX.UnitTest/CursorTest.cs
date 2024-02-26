@@ -14,7 +14,7 @@ namespace MDBX.UnitTest
         [Fact(DisplayName = "basic cursor operation")]
         public void Test1()
         {
-            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "mdbx");
+            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "mdbx_cursor");
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
 
@@ -73,7 +73,7 @@ namespace MDBX.UnitTest
         [Fact(DisplayName = "update by cursor")]
         public void Test2()
         {
-            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "mdbx");
+            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "mdbx_cursor");
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
 
@@ -136,7 +136,7 @@ namespace MDBX.UnitTest
         [Fact(DisplayName = "enumerate all (raw value)")]
         public void Test3()
         {
-            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "mdbx2");
+            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "mdbx2_cursor");
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
 
