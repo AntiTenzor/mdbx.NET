@@ -25,7 +25,7 @@ namespace MDBX.UnitTest
                    .Open(path, EnvironmentFlag.NoTLS, Convert.ToInt32("666", 8));
 
                 DatabaseOption option = DatabaseOption.Create /* needed to create a new db if not exists */
-                    | DatabaseOption.IntegerKey/* opitimized for fixed key */;
+                    | DatabaseOption.IntegerKey /* optimized for fixed key */;
 
                 // mdbx_put
                 using (MdbxTransaction tran = env.BeginTransaction())
