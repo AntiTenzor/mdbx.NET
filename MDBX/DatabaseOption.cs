@@ -24,7 +24,7 @@ namespace MDBX
         DupSort = Constant.MDBX_DUPSORT,
 
         /// <summary>
-        /// Keys are binary integers in native byte order, either uin32_t or
+        /// Keys are binary integers in native byte order, either uint32_t or
         /// uint64_t, and will be sorted as such. The keys must all be of the
         /// same size
         /// </summary>
