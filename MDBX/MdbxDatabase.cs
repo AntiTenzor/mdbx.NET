@@ -132,25 +132,58 @@ namespace MDBX
 
 
         /// <summary>
-        /// Get a single key
+        /// Get byte array value for a single key
         /// </summary>
-        /// <param name="key"></param>
+        /// <param name="key">byte array key (NOT NULL)</param>
         /// <returns>null if key is not found</returns>
-        public byte[] Get(byte[] key)
+        public unsafe byte[] Get(byte[] key)
         {
-            IntPtr keyPtr = Marshal.AllocHGlobal(key.Length);
-
             try
             {
-                Marshal.Copy(key, 0, keyPtr, key.Length);
-                DbValue dbKey = new DbValue(keyPtr, key.Length);
+                fixed (byte* keyPtr = key)
+                {
+                    DbValue dbKey = new DbValue((IntPtr)keyPtr, key.Length);
+                    DbValue dbValue = Dbi.Get(_tran._txnPtr, _dbi, dbKey);
+
+                    byte[] buffer = null;
+                    if (dbValue.Address != IntPtr.Zero && dbValue.Length >= 0)
+                    {
+                        buffer = new byte[dbValue.Length];
+                        if (dbValue.Length > 0)
+                        {
+                            Marshal.Copy(dbValue.Address, buffer, 0, buffer.Length);
+                        }
+                    }
+
+                    return buffer;
+                }
+            }
+            catch (MdbxException ex)
+            {
+                if (ex.ErrorNumber == MdbxCode.MDBX_NOTFOUND)
+                    return null; // key not found
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get byte array value for a single integer key
+        /// </summary>
+        /// <param name="key">integer key</param>
+        /// <returns>null if key is not found</returns>
+        public unsafe byte[] Get(int key)
+        {
+            try
+            {
+                byte* keyPtr = (byte*)(&key);
+                DbValue dbKey = new DbValue((IntPtr)keyPtr, sizeof(int));
                 DbValue dbValue = Dbi.Get(_tran._txnPtr, _dbi, dbKey);
 
                 byte[] buffer = null;
                 if (dbValue.Address != IntPtr.Zero && dbValue.Length >= 0)
                 {
                     buffer = new byte[dbValue.Length];
-                    if(dbValue.Length > 0)
+                    if (dbValue.Length > 0)
                     {
                         Marshal.Copy(dbValue.Address, buffer, 0, buffer.Length);
                     }
@@ -158,15 +191,58 @@ namespace MDBX
 
                 return buffer;
             }
-            catch(MdbxException ex)
+            catch (MdbxException ex)
             {
                 if (ex.ErrorNumber == MdbxCode.MDBX_NOTFOUND)
                     return null; // key not found
+
                 throw;
             }
-            finally
+        }
+
+        /// <summary>
+        /// Get byte array value for a single integer key
+        /// </summary>
+        /// <param name="key">integer key</param>
+        /// <param name="encoding">Encoding to convert byte array to string (NOT NULL!).</param>
+        /// <returns>null if key is not found</returns>
+        public unsafe string Get(int key, Encoding encoding)
+        {
+            if (encoding == null)
+                throw new ArgumentNullException(nameof(encoding));
+
+            try
             {
-                Marshal.FreeHGlobal(keyPtr);
+                byte* keyPtr = (byte*)(&key);
+                DbValue dbKey = new DbValue((IntPtr)keyPtr, sizeof(int));
+                DbValue dbValue = Dbi.Get(_tran._txnPtr, _dbi, dbKey);
+
+                if (dbValue.Address == IntPtr.Zero)
+                    return null;
+
+                if (dbValue.Length > 0)
+                {
+                    string res = encoding.GetString((byte*)dbValue.Address.ToPointer(), dbValue.Length);
+                    return res;
+                }
+                else if (dbValue.Length == 0)
+                {
+                    return String.Empty;
+                }
+                else
+                {
+                    // TODO: is it possible?
+                    //if (dbValue.Length < 0)
+                    
+                    return null;
+                }
+            }
+            catch (MdbxException ex)
+            {
+                if (ex.ErrorNumber == MdbxCode.MDBX_NOTFOUND)
+                    return null; // key not found
+
+                throw;
             }
         }
 
