@@ -15,9 +15,13 @@ namespace MDBX
         public const int MDBX_RESULT_FALSE = 0;
         public const int MDBX_RESULT_TRUE = -1;
 
-        /* key/data pair already exists */
+        /// <summary>
+        /// key/data pair already exists
+        /// </summary>
         public const int MDBX_KEYEXIST = -30799;
-        /* key/data pair not found (EOF) */
+        /// <summary>
+        /// key/data pair not found (EOF)
+        /// </summary>
         public const int MDBX_NOTFOUND = -30798;
         /* Requested page not found - this usually indicates corruption */
         public const int MDBX_PAGE_NOTFOUND = -30797;
@@ -29,17 +33,25 @@ namespace MDBX
         public const int MDBX_VERSION_MISMATCH = -30794;
         /* File is not a valid MDBX file */
         public const int MDBX_INVALID = -30793;
-        /* Environment mapsize reached */
+        /// <summary>
+        /// Environment mapsize reached
+        /// </summary>
         public const int MDBX_MAP_FULL = -30792;
         /* Environment maxdbs reached */
         public const int MDBX_DBS_FULL = -30791;
-        /* Environment maxreaders reached */
+        /// <summary>
+        /// Environment maxreaders reached
+        /// </summary>
         public const int MDBX_READERS_FULL = -30790;
-        /* Txn has too many dirty pages */
+        /// <summary>
+        /// Txn has too many dirty pages
+        /// </summary>
         public const int MDBX_TXN_FULL = -30788;
         /* Cursor stack too deep - internal error */
         public const int MDBX_CURSOR_FULL = -30787;
-        /* Page has not enough space - internal error */
+        /// <summary>
+        /// Page has not enough space - internal error
+        /// </summary>
         public const int MDBX_PAGE_FULL = -30786;
         /* Database contents grew beyond environment mapsize */
         public const int MDBX_MAP_RESIZED = -30785;
@@ -53,7 +65,9 @@ namespace MDBX
         public const int MDBX_BAD_RSLOT = -30783;
         /* Transaction must abort, has a child, or is invalid */
         public const int MDBX_BAD_TXN = -30782;
-        /* Unsupported size of key/DB name/data, or wrong DUPFIXED size */
+        /// <summary>
+        /// Unsupported size of key/DB name/data, or wrong DUPFIXED size
+        /// </summary>
         public const int MDBX_BAD_VALSIZE = -30781;
         /* The specified DBI was changed unexpectedly */
         public const int MDBX_BAD_DBI = -30780;
