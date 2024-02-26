@@ -24,13 +24,13 @@ namespace MDBX.UnitTest
                 env.SetMaxDatabases(10) /* allow us to use a different db for testing */
                    .Open(path, EnvironmentFlag.NoTLS, Convert.ToInt32("666", 8));
 
-                DatabaseOption option = DatabaseOption.Create /* needed to create a new db if not exists */
+                DatabaseOption optionCreate = DatabaseOption.Create /* needed to create a new db if not exists */
                     | DatabaseOption.IntegerKey /* optimized for fixed key */;
 
                 // mdbx_put
                 using (MdbxTransaction tran = env.BeginTransaction())
                 {
-                    MdbxDatabase db = tran.OpenDatabase("basic_op_test", option);
+                    MdbxDatabase db = tran.OpenDatabase("basic_op_test", optionCreate);
                     db.Put(10L, "ten");
                     db.Put(1000L, "thousand");
                     db.Put(1000000000L, "billion");
@@ -41,10 +41,15 @@ namespace MDBX.UnitTest
                 }
 
 
+                // Quote from XML-comment:
+                // Option 'Create' is NOT allowed in a read-only transaction or a read-only environment.'
+                // So we have to open existing database with special option set.
+                DatabaseOption optionOpenExistingReadOnly = DatabaseOption.IntegerKey /* optimized for fixed key */;
+
                 // mdbx_get
                 using (MdbxTransaction tran = env.BeginTransaction(TransactionOption.ReadOnly))
                 {
-                    MdbxDatabase db = tran.OpenDatabase("basic_op_test", option);
+                    MdbxDatabase db = tran.OpenDatabase("basic_op_test", optionOpenExistingReadOnly);
 
                     string text = db.Get<long, string>(1000000L);
                     Assert.NotNull(text);
@@ -54,7 +59,7 @@ namespace MDBX.UnitTest
                 // mdbx_del
                 using (MdbxTransaction tran = env.BeginTransaction())
                 {
-                    MdbxDatabase db = tran.OpenDatabase("basic_op_test", option);
+                    MdbxDatabase db = tran.OpenDatabase("basic_op_test", optionOpenExistingReadOnly);
                     bool deleted = db.Del(100L);
                     Assert.True(deleted);
                     deleted = db.Del(100L);
@@ -66,7 +71,7 @@ namespace MDBX.UnitTest
                 // mdbx_get
                 using (MdbxTransaction tran = env.BeginTransaction(TransactionOption.ReadOnly))
                 {
-                    MdbxDatabase db = tran.OpenDatabase("basic_op_test", option);
+                    MdbxDatabase db = tran.OpenDatabase("basic_op_test", optionOpenExistingReadOnly);
 
                     string text = db.Get<long, string>(100L);
                     Assert.Null(text);

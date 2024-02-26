@@ -152,13 +152,13 @@ namespace MDBX.UnitTest
                     .Open(path, flags, Convert.ToInt32("666", 8));
 
 
-                DatabaseOption option = DatabaseOption.Create | DatabaseOption.IntegerKey;
+                DatabaseOption optionCreate = DatabaseOption.Create | DatabaseOption.IntegerKey;
                 // add some values
                 using (MdbxTransaction tran = env.BeginTransaction())
                 {
-                    MdbxDatabase db = tran.OpenDatabase("cursor_test3", option);
+                    MdbxDatabase db = tran.OpenDatabase("cursor_test3", optionCreate);
 
-                    for ( long i = 0; i < 1000000; i++)
+                    for ( long i = 0; i < 1_000_000; i++)
                     {
                         db.Put(i, Guid.NewGuid().ToByteArray());
                     }
@@ -166,9 +166,14 @@ namespace MDBX.UnitTest
                     tran.Commit();
                 }
 
+                // Quote from XML-comment:
+                // Option 'Create' is NOT allowed in a read-only transaction or a read-only environment.'
+                // So we have to open existing database with special option set.
+                DatabaseOption optionOpenExistingReadOnly = DatabaseOption.IntegerKey /* optimized for fixed key */;
+
                 using (MdbxTransaction tran = env.BeginTransaction(TransactionOption.ReadOnly))
                 {
-                    MdbxDatabase db = tran.OpenDatabase("cursor_test3", option);
+                    MdbxDatabase db = tran.OpenDatabase("cursor_test3", optionOpenExistingReadOnly);
                     using (MdbxCursor cursor = db.OpenCursor())
                     {
                         long key = 0;
