@@ -10,6 +10,7 @@
     <Description>.NET bindings of libmdbx, succeeder of LMDB(Lightning Memory-Mapped Database)</Description>
     <PackageTags>lmdb mdbx libmdbx key-value performance storage-engine no-sql</PackageTags>
     <Version>1.1.3</Version>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
