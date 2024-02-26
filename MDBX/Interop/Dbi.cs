@@ -93,6 +93,22 @@ namespace MDBX.Interop
             return value;
         }
 
+        /// <summary>
+        /// Get value from DB for provided key.
+        /// This overload returns error code instead of throwing exception.
+        /// </summary>
+        /// <param name="txn"></param>
+        /// <param name="dbi"></param>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <returns>0 in case of success, some MdbxCode in case of an error</returns>
+        internal static int Get(IntPtr txn, uint dbi, DbValue key, out DbValue value)
+        {
+            value = new DbValue();
+            int errorCode = _getDelegate(txn, dbi, ref key, ref value);            
+            return errorCode;
+        }
+
 
 
         [SuppressUnmanagedCodeSecurity]
