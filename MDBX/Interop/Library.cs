@@ -69,6 +69,10 @@ namespace MDBX.Interop
                 , filename
                 );
 
+            // Locate library in the root folder also (this simplifies 'stupid' single-OS-single-ARCH deployment)
+            if (!File.Exists(filepath))
+                filepath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), filename);
+
             if (!File.Exists(filepath))
                 throw new FileNotFoundException($"MDBX cannot find the library at {filepath}", filepath);
 
