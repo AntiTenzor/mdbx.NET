@@ -350,7 +350,9 @@ namespace MDBX.UnitTest
                 env.SetMaxDatabases(maxDatabases); /* allow us to use a different db for testing */
                 env.Open(path, EnvironmentFlag.NoTLS, Convert.ToInt32("666", 8));
 
-                byte[] value = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString()); // some value in bytes
+                Guid guid = Guid.NewGuid();
+                string expected = guid.ToString();
+                byte[] value = Encoding.UTF8.GetBytes(expected); // some value in bytes
 
 
 
@@ -364,6 +366,20 @@ namespace MDBX.UnitTest
                     db.Put(7, value);
                     tran.Commit();
                 }
+
+
+
+                // mdbx_get
+                string actual = null;
+                using (MdbxTransaction tran = env.BeginTransaction())
+                {
+                    MdbxDatabase db = tran.OpenDatabase(name: "test_int_key", option: optionCreate);
+                    actual = db.Get(7, Encoding.UTF8);
+                    tran.Commit();
+                }
+
+                Assert.Equal(expected.Length, actual.Length);
+                Assert.Equal(expected, actual);
 
 
 
