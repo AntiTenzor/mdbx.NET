@@ -18,7 +18,7 @@ namespace MDBX
     /// After a successful commit the handle will reside in the shared
     /// environment, and may be used by other transactions.
     /// </summary>
-    public class MdbxDatabase
+    public class MdbxDatabase : IDisposable
     {
 
         private readonly MdbxEnvironment _env;
@@ -247,12 +247,14 @@ namespace MDBX
         }
 
         /// <summary>
-        /// Get string value for a single integer key
+        /// Get string value for a single integer key.
+        /// This is soft implementation, that just returns error code in case of problems.
         /// </summary>
         /// <param name="key">integer key</param>
         /// <param name="encoding">Encoding to convert byte array to string (NOT NULL!).</param>
         /// <param name="text">result string value</param>
         /// <returns>result code</returns>
+        /// <exception cref="ArgumentNullException">if encoding is null</exception>
         public unsafe int Get(int key, Encoding encoding, out string text)
         {
             if (encoding == null)
@@ -390,5 +392,12 @@ namespace MDBX
             return new MdbxCursor(_env, _tran, this, ptr);
         }
 
+        #region Implements IDisposable
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            Close();
+        }
+        #endregion Implements IDisposable
     }
 }
