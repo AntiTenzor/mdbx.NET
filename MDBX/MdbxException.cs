@@ -10,7 +10,7 @@ namespace MDBX
     {
         public int ErrorNumber { get { return _errorNumber; } }
         private readonly int _errorNumber;
-        internal MdbxException(string method, int errNum) : 
+        public MdbxException(string method, int errNum) : 
             base(GetMessage(method, errNum))
         {
             _errorNumber = errNum;
