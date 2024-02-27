@@ -201,7 +201,7 @@ namespace MDBX
         }
 
         /// <summary>
-        /// Get byte array value for a single integer key
+        /// Get string value for a single integer key
         /// </summary>
         /// <param name="key">integer key</param>
         /// <param name="encoding">Encoding to convert byte array to string (NOT NULL!).</param>
@@ -243,6 +243,61 @@ namespace MDBX
                     return null; // key not found
 
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// Get string value for a single integer key
+        /// </summary>
+        /// <param name="key">integer key</param>
+        /// <param name="encoding">Encoding to convert byte array to string (NOT NULL!).</param>
+        /// <param name="text">result string value</param>
+        /// <returns>result code</returns>
+        public unsafe int Get(int key, Encoding encoding, out string text)
+        {
+            if (encoding == null)
+                throw new ArgumentNullException(nameof(encoding));
+
+            text = null;
+
+            try
+            {
+                byte* keyPtr = (byte*)(&key);
+                DbValue dbKey = new DbValue((IntPtr)keyPtr, sizeof(int));
+                int errCode = Dbi.Get(_tran._txnPtr, _dbi, dbKey, out DbValue dbValue);
+                if (errCode != MdbxCode.MDBX_SUCCESS)
+                    return errCode;
+
+                if (dbValue.Address == IntPtr.Zero)
+                    return MdbxCode.MDBX_NOTFOUND;
+
+                if (dbValue.Length > 0)
+                {
+                    text = encoding.GetString((byte*)dbValue.Address.ToPointer(), dbValue.Length);
+                    return MdbxCode.MDBX_SUCCESS;
+                }
+                else if (dbValue.Length == 0)
+                {
+                    text = String.Empty;
+                    return MdbxCode.MDBX_SUCCESS;
+                }
+                else
+                {
+                    // TODO: is it possible?
+                    //if (dbValue.Length < 0)
+
+                    return MdbxCode.MDBX_NOTFOUND;
+                }
+            }
+            catch (MdbxException ex)
+            {
+                if (ex.ErrorNumber == MdbxCode.MDBX_NOTFOUND)
+                    return ex.ErrorNumber; // key not found
+
+                //throw;
+
+                // In this method I'll return all errors
+                return ex.ErrorNumber;
             }
         }
 
