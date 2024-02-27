@@ -363,6 +363,9 @@ namespace MDBX.UnitTest
                 using (MdbxTransaction tran = env.BeginTransaction())
                 {
                     MdbxDatabase db = tran.OpenDatabase(name: "test_int_key", option: optionCreate);
+
+                    db.Empty();
+
                     db.Put(7, value);
                     tran.Commit();
                 }
