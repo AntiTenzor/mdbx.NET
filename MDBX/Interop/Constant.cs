@@ -32,7 +32,7 @@ namespace MDBX.Interop
         public const int MDBX_LIFORECLAIM = 0x4000000;
         /* make a steady-sync only on close and explicit env-sync */
         public const int MDBX_UTTERLY_NOSYNC = (MDBX_NOSYNC | MDBX_MAPASYNC);
-        /* debuging option; fill/perturb released pages */
+        /* debugging option; fill/perturb released pages */
         public const int MDBX_PAGEPERTURB = 0x8000000;
         /* Do not block when starting a write transaction */
         public const int MDBX_TRYTXN = 0x10000000;
