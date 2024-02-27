@@ -88,7 +88,7 @@ namespace MDBX.Interop
         {
             DbValue value = new DbValue();
             int err = _getDelegate(txn, dbi, ref key, ref value);
-            if (err != 0)
+            if (err != MdbxCode.MDBX_SUCCESS)
                 throw new MdbxException("mdbx_get", err);
             return value;
         }
